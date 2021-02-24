@@ -9,11 +9,11 @@ vc +kick13 calcshadowmask.c -o calcshadowmask
 
 ## description
 The CalcShadowMask function uses the blitter to calculate a shadow mask. The following parameters are needed:
-+UWORD *imgdata - a pointer to the source image data
-+UWORD *shadowmask - a pointer to the destination image data (the final shadow mask)
-+int depth - the number of bitplanes of the source image
-+int width - the width (in words) of the source image
-+int height - the height of the source images (number or rows)
++ UWORD *imgdata - a pointer to the source image data
++ UWORD *shadowmask - a pointer to the destination image data (the final shadow mask)
++ int depth - the number of bitplanes of the source image
++ int width - the width (in words) of the source image
++ int height - the height of the source images (number or rows)
 
 OwnBlitter() takes exclusive access to the hardware blitter.
 
