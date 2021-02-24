@@ -1,8 +1,11 @@
 #include <proto/exec.h>
+#include <proto/graphics.h>
 #include <hardware/custom.h>
 #include <stdio.h>
 
 #define custom ((struct Custom *) (0xdff000))
+
+struct GfxBase *GfxBase;
 
 void CalcShadowMask(UWORD *imgdata, UWORD *shadowmask, int depth, int width, int height);
 
@@ -14,6 +17,8 @@ int main()
 
 	UWORD *imgdata = AllocMem(depth*2*width*height, MEMF_CHIP|MEMF_CLEAR); /* allocate memory for source image */
 	UWORD *shadowmask = AllocMem(2*width*height, MEMF_CHIP|MEMF_CLEAR); /* allocate memory for shadow mask */
+
+	GfxBase = (struct GfxBase *)OpenLibrary ("graphics.library", 0L);
 	
 	/* example image data */
 	
@@ -35,12 +40,17 @@ int main()
 	CalcShadowMask(imgdata, shadowmask, depth, width, height); /* calculate shadow mask for source image */
 	
 	printf("row 0: %x\nrow 1: %x\nrow 2: %x\n",shadowmask[0],shadowmask[1],shadowmask[2]); /* print calculated shadow mask values */
+	
+	CloseLibrary ((struct Library *) GfxBase);
 }
 
 void CalcShadowMask(UWORD *imgdata, UWORD *shadowmask, int depth, int width, int height)
 {
 	int planesize;
 	int blittersize;
+	
+	OwnBlitter(); /* take control over blitter */
+	WaitBlit();
 	
 	custom->bltcon0 = 0x0dfc; /* use source A, source B and destination D (0x0d); minterm 0xfc : A|B = D */
 	custom->bltcon1 = 0x0000; /* no shift of source B */
@@ -64,10 +74,12 @@ void CalcShadowMask(UWORD *imgdata, UWORD *shadowmask, int depth, int width, int
 		custom->bltdpt = shadowmask; /* destination D points to shadowmask image */
 		
 		custom->bltsize = blittersize; /* start blitter operation */
-		do {} while ((custom->dmaconr) & 0x4000); /* wait until blitter has finished operation */
+		WaitBlit(); /* wait until blitter has finished operation */
 		
 		depth = depth - 1; /* loop counter */
 		imgdata = imgdata + planesize; /* set source image pointer to next bitplane address */
 				
 	} while (depth); /* loop through all source image bitplanes */
+	
+	DisownBlitter(); /* free blitter */
 }
