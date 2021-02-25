@@ -62,7 +62,7 @@ void CalcShadowMask(UWORD *imgdata, UWORD *shadowmask, int depth, int width, int
 	
 	planesize = width * height; /* size of one bitplane in words */
 	
-	height = height & 0x03ff; /* for special case heigh = 1024 */
+	height = height & 0x03ff; /* for special case height = 1024 */
 	width = width & 0x003f; /* for special case width = 64 */
 	
 	blittersize = height<<6; /* shift height to bits 15 - 6 */
